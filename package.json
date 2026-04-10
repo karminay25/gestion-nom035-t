@@ -1,5 +1,5 @@
 {
-  "name": "gestion-nom035-t",
+  "name": "gestion-nom-035",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,12 +9,24 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.102.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
+    "mssql": "^12.2.1",
     "next": "16.2.2",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.20.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "shadcn-ui": "^0.9.5",
+    "ssh2": "^1.17.0",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/mssql": "^9.1.11",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
