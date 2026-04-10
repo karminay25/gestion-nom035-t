@@ -31,18 +31,48 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // States for Drawer
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [surveyDetails, setSurveyDetails] = useState<any>(null);
   const [loadingSurvey, setLoadingSurvey] = useState(false);
 
-  // States for Print Dropdown & Selection
   const [printMenuOpen, setPrintMenuOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
-  // REDIRECT CHECK (After hooks to comply with Rules of Hooks)
-  if (!authorized) return null;
+  // 1. Memoized Values (MUST be before early return)
+  const filteredEmployees = useMemo(() => {
+    return employees.filter(emp => {
+      const matchesSearch = emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           emp.code.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCompany = companyFilter === 'all' || emp.company === companyFilter;
+      
+      let matchesStatus = true;
+      if (statusFilter === 'COMPLETADO') matchesStatus = emp.status === 'COMPLETADO';
+      if (statusFilter === 'PENDIENTE') matchesStatus = emp.status === 'PENDIENTE';
 
+      let matchesRisk = true;
+      if (riskFilter !== 'all') matchesRisk = emp.riskLevel === riskFilter;
+
+      return matchesSearch && matchesCompany && matchesStatus && matchesRisk;
+    });
+  }, [employees, searchTerm, companyFilter, statusFilter, riskFilter]);
+
+  const stats = useMemo(() => {
+    const total = filteredEmployees.length;
+    const completed = filteredEmployees.filter(e => e.status === 'COMPLETADO').length;
+    const highRisk = filteredEmployees.filter(e => e.riskLevel === 'Alto' || e.riskLevel === 'Muy Alto').length;
+    const withATS = filteredEmployees.filter(e => e.atsResult === 'REQUIERE VALORACIÓN').length;
+    return { total, completed, highRisk, withATS };
+  }, [filteredEmployees]);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredEmployees.slice(start, start + PAGE_SIZE);
+  }, [filteredEmployees, currentPage]);
+
+  const totalPages = Math.ceil(filteredEmployees.length / PAGE_SIZE);
+  const companies = useMemo(() => Array.from(new Set(employees.map(emp => emp.company))), [employees]);
+
+  // 2. Effects (MUST be before early return)
   const fetchEmployees = async () => {
     setLoading(true);
     try {
@@ -57,6 +87,22 @@ export default function AdminDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (authorized) {
+      fetchEmployees();
+    }
+  }, [authorized]);
+
+  // 3. Early Return (ONLY after all hook calls)
+  if (!authorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  // 4. Component Functions
   const handleSync = async () => {
     setSyncing(true);
     try {
@@ -101,42 +147,6 @@ export default function AdminDashboard() {
     setSelectedIds(next);
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  const filteredEmployees = useMemo(() => {
-    return employees.filter(emp => {
-      const matchesSearch = emp.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           emp.code.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCompany = companyFilter === 'all' || emp.company === companyFilter;
-      
-      let matchesStatus = true;
-      if (statusFilter === 'COMPLETADO') matchesStatus = emp.status === 'COMPLETADO';
-      if (statusFilter === 'PENDIENTE') matchesStatus = emp.status === 'PENDIENTE';
-
-      let matchesRisk = true;
-      if (riskFilter !== 'all') matchesRisk = emp.riskLevel === riskFilter;
-
-      return matchesSearch && matchesCompany && matchesStatus && matchesRisk;
-    });
-  }, [employees, searchTerm, companyFilter, statusFilter, riskFilter]);
-
-  const stats = useMemo(() => {
-    const total = filteredEmployees.length;
-    const completed = filteredEmployees.filter(e => e.status === 'COMPLETADO').length;
-    const highRisk = filteredEmployees.filter(e => e.riskLevel === 'Alto' || e.riskLevel === 'Muy Alto').length;
-    const withATS = filteredEmployees.filter(e => e.atsResult === 'REQUIERE VALORACIÓN').length;
-    return { total, completed, highRisk, withATS };
-  }, [filteredEmployees]);
-
-  const paginatedEmployees = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredEmployees.slice(start, start + PAGE_SIZE);
-  }, [filteredEmployees, currentPage]);
-
-  const totalPages = Math.ceil(filteredEmployees.length / PAGE_SIZE);
-
   const handleCopyLink = () => {
     const baseUrl = window.location.origin;
     navigator.clipboard.writeText(`${baseUrl}/login`);
@@ -144,11 +154,9 @@ export default function AdminDashboard() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const companies = Array.from(new Set(employees.map(emp => emp.company)));
-
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex">
-      {/* Sidebar HistÃ³rico (Placeholder para navegaciÃ³n futura) */}
+    <div className="min-h-screen bg-[#f8fafc] flex text-gray-900">
+      {/* Sidebar Histórico */}
       <div className="w-20 bg-[#0f172a] hidden md:flex flex-col items-center py-8 gap-8 border-r border-white/10">
         <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
           <Building2 className="text-white w-6 h-6" />
@@ -197,7 +205,7 @@ export default function AdminDashboard() {
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 p-2"
                   >
-                    <div className="px-3 py-2 text-[10px] font-black text-gray-400 uppercase letter spacing-widest">Opciones de ImpresiÃ³n</div>
+                    <div className="px-3 py-2 text-[10px] font-black text-gray-400 uppercase letter-spacing-widest">Opciones de Impresión</div>
                     <button 
                       onClick={() => {
                         window.open(`/admin/report/batch?ids=${Array.from(selectedIds).join(',')}`, '_blank');
@@ -428,12 +436,12 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* DifusiÃ³n Card */}
+          {/* Difusión Card */}
           <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl shadow-blue-500/20">
             <div>
               <h2 className="text-3xl font-black tracking-tight mb-3">Enlace de Difusión</h2>
               <p className="text-blue-100 text-lg opacity-90 leading-relaxed max-w-xl font-medium">
-                Copia este link y envíalo a todos los trabajadores de Lola Berries y Bosbes Berries para comenzar la evaluación anual NOM-035.
+                Copia este link y envíalo a todos los trabajadores para comenzar la evaluación anual NOM-035.
               </p>
             </div>
             <button 
@@ -477,7 +485,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <h3 className="text-lg font-black text-gray-900 mb-2">Exportar Evidencias</h3>
-                <p className="text-gray-500 text-sm leading-relaxed mb-5 font-medium">Genera una sábana de Excel con todas las respuestas y tiempos de completado para control interno.</p>
+                <p className="text-gray-500 text-sm leading-relaxed mb-5 font-medium">Genera una sábana de Excel con todas las respuestas para control interno.</p>
                 <a 
                    href="/api/export"
                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-black hover:bg-green-700 transition-all flex items-center gap-2 group"
@@ -526,7 +534,7 @@ export default function AdminDashboard() {
                   {/* Detalles Base */}
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="text-[10px] font-black text-gray-400 uppercase">CÃ³digo Empleado</label>
+                      <label className="text-[10px] font-black text-gray-400 uppercase">Código Empleado</label>
                       <p className="font-bold text-gray-900 mt-1">{selectedEmployee.code}</p>
                     </div>
                     <div>
@@ -553,14 +561,13 @@ export default function AdminDashboard() {
                       </div>
                     ) : surveyDetails ? (
                       <div className="space-y-8">
-                         {/* Puntaje y Riesgo Global */}
                         <div className="flex items-center gap-6">
                           <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm text-center min-w-[100px]">
                             <p className="text-[10px] font-black text-gray-400 uppercase mb-1">TOTAL</p>
-                            <p className="text-2xl font-black text-gray-900">{surveyDetails.score ?? (surveyDetails.ans ? Object.values(surveyDetails.ans).length : 0)}</p>
+                            <p className="text-2xl font-black text-gray-900">{surveyDetails.score || 0}</p>
                           </div>
                           <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase mb-1">DiagnÃ³stico Global</p>
+                            <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Diagnóstico Global</p>
                             <p className={`text-xl font-black ${
                               surveyDetails.riskLevel === 'Muy Alto' ? 'text-red-500' : 
                               surveyDetails.riskLevel === 'Alto' ? 'text-orange-500' : 'text-green-500'
@@ -570,7 +577,6 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                         {/* SecciÃ³n ATS ExtraÃda */}
                         <div className={`p-5 rounded-2xl border flex items-start gap-4 ${
                           surveyDetails.atsResult === 'REQUIERE VALORACIÓN' ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'
                         }`}>
@@ -580,16 +586,15 @@ export default function AdminDashboard() {
                           <div>
                             <p className={`text-[11px] font-black uppercase mb-1 ${
                               surveyDetails.atsResult === 'REQUIERE VALORACIÓN' ? 'text-red-700' : 'text-green-700'
-                            }`}>Acontecimiento TraumÃ¡tico (GuÃa I)</p>
+                            }`}>Acontecimiento Traumático (Guía I)</p>
                             <p className="text-xs font-bold leading-tight opacity-80">
                               {surveyDetails.atsResult === 'REQUIERE VALORACIÓN' 
-                                ? 'Se recomienda derivar inmediatamente a valoraciÃ³n mÃ©dica.' 
-                                : 'No se detectaron eventos severos que requieran atenciÃ³n inmediata.'}
+                                ? 'Se recomienda derivar inmediatamente a valoración médica.' 
+                                : 'No se detectaron eventos severos.'}
                             </p>
                           </div>
                         </div>
 
-                        {/* BotÃ³n Reporte Individual PDF */}
                         <div className="pt-4 flex gap-4">
                           <button 
                             onClick={() => window.open(`/admin/report/${selectedEmployee.id}`, '_blank')}
