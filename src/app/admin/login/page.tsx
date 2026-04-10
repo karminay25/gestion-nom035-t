@@ -19,7 +19,8 @@ export default function AdminLoginPage() {
 
     // Simulación de autenticación administrativa
     setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+      if (username === 'admin' && password === 'LolaBerries*2026') {
+        localStorage.setItem('admin_session', 'true');
         router.push('/admin');
       } else {
         setError('Credenciales administrativas incorrectas');

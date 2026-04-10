@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, FileText, AlertTriangle, RefreshCw, ChevronRight, ChevronLeft, Search, Building2, Clock, CheckCircle2, X, BarChart, Copy, Printer, Info, Download } from 'lucide-react';
 import type { Employee } from '@/lib/nom035/sync-agent';
@@ -8,7 +9,22 @@ import type { Employee } from '@/lib/nom035/sync-agent';
 const PAGE_SIZE = 20;
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const session = localStorage.getItem('admin_session');
+    if (!session) {
+      router.push('/admin/login');
+    } else {
+      setAuthorized(true);
+    }
+  }, [router]);
+
   const [employees, setEmployees] = useState<Employee[]>([]);
+
+  if (!authorized) return null;
+
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
