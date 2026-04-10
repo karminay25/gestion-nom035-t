@@ -94,7 +94,7 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
         </div>
 
         {finalSurveys.map((survey) => (
-          <NOM035Report key={survey.id} survey={survey} hidePrintButton />
+          <NOM035Report key={survey.id} survey={survey} />
         ))}
       </div>
     </>
