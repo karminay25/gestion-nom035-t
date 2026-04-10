@@ -139,7 +139,7 @@ export default function NOM035Report({ survey, hidePrintButton = false }: NOM035
 
   return (
     <div className="acuse-sheet" style={{
-      width: '210mm', minHeight: '270mm', margin: '0 auto', background: '#fff',
+      width: '210mm', minHeight: '250mm', margin: '0 auto', background: '#fff',
       padding: '11mm 14mm', boxSizing: 'border-box',
       position: 'relative'
     }}>

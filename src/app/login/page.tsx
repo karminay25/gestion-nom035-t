@@ -13,10 +13,19 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const normalizeText = (text: string) => {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ');
+  };
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!employeeCode || !selectedCompany) {
-      setError('Selecciona tu empresa e ingresa tu código');
+      setError('Selecciona tu empresa e ingresa tu nombre completo');
       return;
     }
 
@@ -24,21 +33,19 @@ export default function LoginPage() {
     setError('');
     
     try {
-      // Consultamos a la API que creamos que lee de CONTPAQi
       const response = await fetch('/api/employees');
       const employees = await response.json();
       
-      const normalize = (c: string) => c.trim().replace(/^0+(?!$)/, '');
-      const inputCode = normalize(employeeCode);
+      const inputNormalized = normalizeText(employeeCode);
 
       const found = employees.find((emp: any) => 
-        normalize(emp.code) === inputCode && emp.company === selectedCompany
+        normalizeText(emp.fullName) === inputNormalized && emp.company === selectedCompany
       );
       
       if (found) {
         setEmployeeData(found);
       } else {
-        setError('Código de empleado no encontrado en CONTPAQi');
+        setError('No se encontró a ningún trabajador con ese nombre en esta empresa');
       }
     } catch (err) {
       setError('Error al conectar con el servidor de nómina');
@@ -117,7 +124,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ingresa tu Código</label>
+                  <label className="text-xs font-bold text-gray-500 uppercase ml-1">Ingresa tu Nombre Completo</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <User className="h-5 w-5 text-gray-500 group-focus-within:text-blue-400 transition-colors" />
@@ -126,7 +133,7 @@ export default function LoginPage() {
                       type="text"
                       value={employeeCode}
                       onChange={(e) => setEmployeeCode(e.target.value)}
-                      placeholder="Código de Empleado"
+                      placeholder="Nombre tal cual aparece en tu nómina"
                       className="block w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none text-white transition-all"
                       autoFocus
                     />
