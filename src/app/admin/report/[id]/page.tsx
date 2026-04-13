@@ -27,7 +27,7 @@ export default async function IndividualReportPage({ params }: { params: Promise
       <style>{`
         @media print {
           @page { margin: 0 !important; size: A4; }
-          body { margin: 0 !important; padding: 0 !important; background: white !important; }
+          body { margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; }
           .no-print { display: none !important; }
           .page-root { padding: 0 !important; margin: 0 !important; background: white !important; }
         }
