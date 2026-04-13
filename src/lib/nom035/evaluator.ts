@@ -89,12 +89,16 @@ export function calculateNOM035(guideType: string, answers: Record<string, any>)
 }
 
 export function checkATS(answers: Record<string, any>): boolean {
-  // Sección 1 (G1_Screening): ¿Presenció el evento?
-  const screening = answers['g1_screening'] === 'si';
-  if (!screening) return false;
+  const details = getATSDetails(answers);
+  return details.requiresEvaluation;
+}
 
+export function getATSDetails(answers: Record<string, any>) {
+  // Sección 1 (G1_Screening): ¿Presenció el evento?
+  const hasEvent = answers['g1_screening'] === 'si';
+  
   // Sección 2 (Q7-Q8): Recuerdos
-  const s2Any = answers['q7'] === 'si' || answers['q8'] === 'si';
+  const recollections = answers['q7'] === 'si' || answers['q8'] === 'si';
   
   // Sección 3 (Q9-Q15): Evitación (>= 3 respuestas "si")
   const s3Count = ['q9', 'q10', 'q11', 'q12', 'q13', 'q14', 'q15']
@@ -105,5 +109,14 @@ export function checkATS(answers: Record<string, any>): boolean {
     .filter(id => answers[id] === 'si').length;
 
   // Criterio legal NOM-035: Se requiere atención si se cumple S2 o S3>=3 o S4>=2
-  return s2Any || s3Count >= 3 || s4Count >= 2;
+  const requiresEvaluation = hasEvent && (recollections || s3Count >= 3 || s4Count >= 2);
+
+  return {
+    hasEvent,
+    recollections,
+    avoidanceCount: s3Count,
+    arousalCount: s4Count,
+    requiresEvaluation
+  };
 }
+
