@@ -322,6 +322,15 @@ export default function AdminDashboard() {
                   {companies.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-blue-500/30 outline-none cursor-pointer text-gray-300"
+                >
+                  <option value="all">Todos los estatus</option>
+                  <option value="COMPLETADO">Completados</option>
+                  <option value="PENDIENTE">Pendientes</option>
+                </select>
+                <select
                   value={riskFilter}
                   onChange={(e) => setRiskFilter(e.target.value)}
                   className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold focus:ring-2 focus:ring-blue-500/30 outline-none cursor-pointer text-gray-300"
