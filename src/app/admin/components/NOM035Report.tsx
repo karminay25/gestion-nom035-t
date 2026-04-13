@@ -290,15 +290,10 @@ export default function NOM035Report({ survey }: { survey: any }) {
 
       <style jsx>{`
         @media print {
+          /* En impresión individual, el acuse-root ocupa su página */
           .acuse-root {
             padding: 0 !important;
             background: transparent !important;
-            page-break-after: always !important;
-            break-after: page !important;
-          }
-          .acuse-root:last-of-type {
-            page-break-after: auto !important;
-            break-after: auto !important;
           }
           .acuse-sheet {
             padding: 8mm 12mm !important;
@@ -311,8 +306,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
             justify-content: space-between !important;
             box-shadow: none !important;
             break-inside: avoid !important;
-            page-break-after: avoid !important;
-            break-after: avoid !important;
+            page-break-inside: avoid !important;
           }
           .no-print { display: none !important; }
           body { margin: 0 !important; }

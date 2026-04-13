@@ -44,7 +44,7 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
         @media print {
           @page {
             margin: 0 !important;
-            size: auto;
+            size: A4 portrait;
           }
           body { 
             margin: 0 !important; 
@@ -60,7 +60,36 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
             margin: 0 !important;
             background: transparent !important;
           }
-          /* El propio componente NOM035Report ya tiene el break-after: page */
+          /* Cada acuse-root ocupa exactamente una hoja */
+          .acuse-root {
+            padding: 0 !important;
+            background: transparent !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          /* El último acuse no genera hoja en blanco adicional */
+          .acuse-root:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
+          /* La hoja interior tampoco se parte */
+          .acuse-sheet {
+            padding: 8mm 12mm !important;
+            margin: 0 !important;
+            width: 100% !important;
+            min-height: unset !important;
+            height: 282mm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            box-shadow: none !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          /* Ocultar el anexo técnico en impresión */
+          .details-anexo { display: none !important; }
         }
         .batch-container {
           background: #e5e7eb;
