@@ -354,7 +354,7 @@ export default function AdminDashboard() {
                 {loading ? (
                   Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td colSpan={6} className="px-6 py-6"><div className="h-4 bg-white/5 rounded-lg w-full" /></td>
+                      <td colSpan={7} className="px-6 py-6"><div className="h-4 bg-white/5 rounded-lg w-full" /></td>
                     </tr>
                   ))
                 ) : paginatedEmployees.length > 0 ? (
@@ -409,7 +409,7 @@ export default function AdminDashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="px-6 py-24 text-center">
+                    <td colSpan={7} className="px-6 py-24 text-center">
                       <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Sin resultados</p>
                     </td>
                   </tr>
