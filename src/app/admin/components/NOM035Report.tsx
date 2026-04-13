@@ -228,16 +228,16 @@ export default function NOM035Report({ survey }: { survey: any }) {
         </div>
 
         {/* Firmas */}
-        <div style={{ paddingTop: '20px' }}>
+        <div style={{ paddingTop: '10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: '80px' }}>
             <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ borderTop: '2px solid #000', paddingTop: '8px' }}>
+              <div style={{ borderTop: '2px solid #000', paddingTop: '8px', marginTop: '40px' }}>
                 <p style={{ margin: 0, fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>{emp.fullName || emp.full_name}</p>
                 <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#64748b' }}>Firma del Trabajador</p>
               </div>
             </div>
             <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ borderTop: '2px solid #000', paddingTop: '8px' }}>
+              <div style={{ borderTop: '2px solid #000', paddingTop: '8px', marginTop: '40px' }}>
                 <p style={{ margin: 0, fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>MARÍA FERNANDA MEJÍA BAUTISTA</p>
                 <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#64748b' }}>Responsable / RRHH</p>
               </div>
@@ -251,7 +251,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
       </div>
 
       {/* ANEXO TÉCNICO - AHORA SE IMPRIME EN SEGUNDA HOJA */}
-      <div className="details-anexo" style={{ 
+      <div className="details-anexo no-print" style={{ 
         width: '210mm', margin: '40px auto', background: '#fff', 
         padding: '20px 40px', borderRadius: '16px', border: '1.5px solid #e2e8f0',
         pageBreakBefore: 'always' 
@@ -273,7 +273,16 @@ export default function NOM035Report({ survey }: { survey: any }) {
 
       <style jsx>{`
         @media print {
-          .acuse-root { padding: 0 !important; background: transparent !important; }
+          .acuse-root { 
+            padding: 0 !important; 
+            background: transparent !important; 
+            page-break-after: always !important;
+            break-after: page !important;
+          }
+          .acuse-root:last-of-type {
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
           .acuse-sheet { 
             padding: 10mm 15mm !important; 
             margin: 0 !important; 
@@ -287,6 +296,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
             break-inside: avoid !important;
             zoom: 0.95;
             page-break-after: avoid !important;
+            break-after: avoid !important;
           }
           .details-anexo {
             display: none !important;
