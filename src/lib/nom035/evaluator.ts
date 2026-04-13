@@ -126,3 +126,41 @@ export function getATSDetails(answers: Record<string, any>) {
   };
 }
 
+export function calculateOrganizationalRisk(normativeResults: any, positionRaw: string) {
+  if (!normativeResults || !normativeResults.domains) return null;
+  const position = (positionRaw || '').toUpperCase();
+  
+  const isManagerial = [
+    'GERENTE', 'DIRECTOR', 'JEFE', 'JEFATURA', 'SUPERVISOR', 
+    'COORDINADOR', 'LIDER', 'MANAGER', 'DIRECTORA', 'ENCARGADO'
+  ].some(kw => position.includes(kw));
+
+  if (!isManagerial) {
+    return {
+      isAdjusted: false,
+      score: normativeResults.score,
+      riskLevel: normativeResults.riskLevel,
+      message: "No se requiere ajuste. El riesgo normativo coincide con el riesgo organizacional."
+    };
+  }
+
+  // Ajuste matemático para perfiles gerenciales: 
+  // La Responsabilidad y Carga de Trabajo son inherentes. Extraemos el dominio "Carga de trabajo"
+  const cargaDomain = normativeResults.domains.find((d: any) => d.name === 'Carga de trabajo');
+  let adjustedTotalScore = normativeResults.score;
+
+  if (cargaDomain) {
+    // Si la carga de trabajo aportó puntaje, le aplicamos un factor de atenuación del 35% 
+    // asumiendo que esa carga mental es intrínseca al puesto directivo y no un fallo organizacional.
+    const discount = Math.floor(cargaDomain.score * 0.35);
+    adjustedTotalScore = Math.max(0, adjustedTotalScore - discount);
+  }
+
+  return {
+    isAdjusted: true,
+    score: adjustedTotalScore,
+    riskLevel: getRiskLevel(adjustedTotalScore, G3_THRESHOLDS.total),
+    message: "Ajuste aplicado por jerarquía directiva. La alta carga mental es inherente al perfil y no representa necesariamente un deterioro organizacional interno."
+  };
+}
+

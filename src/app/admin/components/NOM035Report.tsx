@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { calculateNOM035, getATSDetails } from '@/lib/nom035/evaluator';
+import { calculateNOM035, getATSDetails, calculateOrganizationalRisk } from '@/lib/nom035/evaluator';
 import { GUIDE_III, Question } from '@/lib/nom035/questions';
 
 // ── Helpers Legales ──────────────────────────────────────────────────────────
@@ -74,6 +74,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
   const emp = survey.employees;
   const results = calculateNOM035(survey.guide_type, survey.answers);
   const ats = getATSDetails(survey.answers);
+  const orgRisk = results ? calculateOrganizationalRisk(results, emp.position) : null;
 
   if (!results) {
     return (
@@ -177,28 +178,50 @@ export default function NOM035Report({ survey }: { survey: any }) {
           </div>
 
           {/* 3. Resultados Guía III */}
-          <div style={{ marginBottom: '20px', display: 'grid', gridTemplateColumns: '170px 1fr', gap: '20px' }}>
-            <div style={{ border: '3px solid #000', borderRadius: '15px', padding: '12px', textAlign: 'center' }}>
-              <p style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Puntaje Guía III</p>
-              <div style={{ fontSize: '42px', fontWeight: 900, lineHeight: 1 }}>{results.score.toFixed(0)}</div>
-              <div style={{ 
-                fontSize: '11px', fontWeight: 900, padding: '4px 0', borderRadius: '8px', textTransform: 'uppercase', color: '#fff',
-                backgroundColor: riskColor(results.riskLevel), marginTop: '6px'
-              }}>
-                RIESGO {results.riskLevel}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '8px', textTransform: 'uppercase', borderLeft: '5px solid #000', paddingLeft: '8px' }}>3. Dictamen Integral de Riesgo Psicosocial</div>
+            <div style={{ display: 'grid', gridTemplateColumns: orgRisk?.isAdjusted ? '1fr 1fr 1.5fr' : '170px 1fr', gap: '15px' }}>
+              
+              <div style={{ border: '3px solid #000', borderRadius: '15px', padding: '12px', textAlign: 'center' }}>
+                <p style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '5px' }}>Puntaje Legal STPS</p>
+                <div style={{ fontSize: '38px', fontWeight: 900, lineHeight: 1 }}>{results.score.toFixed(0)}</div>
+                <div style={{ 
+                  fontSize: '11px', fontWeight: 900, padding: '4px 0', borderRadius: '8px', textTransform: 'uppercase', color: '#fff',
+                  backgroundColor: riskColor(results.riskLevel), marginTop: '6px'
+                }}>
+                  RIESGO {results.riskLevel}
+                </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h3 style={{ fontSize: '11px', fontWeight: 900, marginBottom: '6px', textTransform: 'uppercase' }}>Dictamen Técnico Integral:</h3>
-              <p style={{ fontSize: '11.5px', lineHeight: '1.5', color: '#1e293b', margin: 0, fontStyle: 'italic' }}>
-                {getFormalDictamen(results.riskLevel, results.score, ats.requiresEvaluation)}
-              </p>
+
+              {orgRisk?.isAdjusted && (
+                <div style={{ border: '2px dashed #0ea5e9', backgroundColor: '#f0f9ff', borderRadius: '15px', padding: '12px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '9px', fontWeight: 800, color: '#0ea5e9', textTransform: 'uppercase', marginBottom: '5px' }}>Riesgo RRHH Ajustado</p>
+                  <div style={{ fontSize: '38px', fontWeight: 900, lineHeight: 1, color: '#0284c7' }}>{orgRisk.score.toFixed(0)}</div>
+                  <div style={{ 
+                    fontSize: '11px', fontWeight: 900, padding: '4px 0', borderRadius: '8px', textTransform: 'uppercase', color: '#fff',
+                    backgroundColor: riskColor(orgRisk.riskLevel), marginTop: '6px'
+                  }}>
+                    RIESGO {orgRisk.riskLevel}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <p style={{ fontSize: '10px', lineHeight: '1.4', color: '#1e293b', margin: 0, fontStyle: 'italic' }}>
+                  <strong>Normativo:</strong> {getFormalDictamen(results.riskLevel, results.score, ats.requiresEvaluation)}
+                </p>
+                {orgRisk?.isAdjusted && (
+                  <p style={{ fontSize: '10px', lineHeight: '1.3', color: '#0369a1', margin: '8px 0 0 0', padding: '6px', backgroundColor: '#e0f2fe', borderRadius: '6px' }}>
+                    <strong>Ajuste Jerárquico:</strong> {orgRisk.message}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
           {/* 4. Desglose Dominios */}
           <div style={{ marginBottom: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '8px', textTransform: 'uppercase', borderLeft: '5px solid #000', paddingLeft: '8px' }}>3. Análisis de Factores de Riesgo (Dominios)</div>
+            <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '8px', textTransform: 'uppercase', borderLeft: '5px solid #000', paddingLeft: '8px' }}>4. Análisis de Factores de Riesgo (Nominales)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {results.domains.map((d: any, i: number) => (
                 <div key={i} style={{ 
@@ -215,15 +238,15 @@ export default function NOM035Report({ survey }: { survey: any }) {
           {/* 5. Acciones y Legal */}
           <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px', marginBottom: '20px' }}>
             <div style={{ border: '2px solid #000', borderRadius: '12px', padding: '12px' }}>
-              <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>4. Plan de Acción Recomendado</h2>
+              <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>5. Plan de Acción Recomendado</h2>
               <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '11px', lineHeight: '1.5' }}>
-                {getFormalActions(results.riskLevel, ats.requiresEvaluation).map((action, i) => (
+                {getFormalActions(orgRisk?.isAdjusted ? orgRisk.riskLevel : results.riskLevel, ats.requiresEvaluation).map((action, i) => (
                   <li key={i} style={{ marginBottom: '3px' }}>{action}</li>
                 ))}
               </ul>
             </div>
             <div style={{ border: '1.5px solid #cbd5e1', borderRadius: '12px', padding: '12px', background: '#f8fafc' }}>
-              <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>5. Contexto Legal</h2>
+              <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>6. Contexto Legal</h2>
               <p style={{ margin: 0, fontSize: '9px', lineHeight: '1.5', color: '#475569' }}>
                 Evaluación confidencial y voluntaria conforme a la NOM-035. Resultados para mejora de condiciones laborales. El tratamiento de datos cumple con la LFPDPPP.
               </p>
