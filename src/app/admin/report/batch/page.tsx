@@ -42,8 +42,13 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
     <>
       <style>{`
         @media print {
+          @page {
+            margin: 0 !important;
+            size: auto;
+          }
           body { 
-            margin: 0; 
+            margin: 0 !important; 
+            padding: 0 !important;
             background: white !important; 
           }
           .no-print { 
@@ -52,25 +57,10 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
           .batch-container {
             display: block !important;
             padding: 0 !important;
-            gap: 0 !important;
-          }
-          .acuse-sheet {
-            box-shadow: none !important;
             margin: 0 !important;
-            border: none !important;
-            page-break-after: always !important;
-            break-after: page !important;
-            break-inside: avoid !important;
+            background: transparent !important;
           }
-          /* Evitar el salto de página en el último elemento para no crear hoja en blanco */
-          .batch-container > .acuse-root:last-child .acuse-sheet {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-          }
-          @page {
-            margin: 0;
-            size: auto;
-          }
+          /* El propio componente NOM035Report ya tiene el break-after: page */
         }
         .batch-container {
           background: #e5e7eb;
@@ -78,12 +68,12 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          gap: 40px;
+          gap: 20px;
         }
       `}</style>
 
       <div className="batch-container">
-        <div className="no-print" style={{ textAlign: 'center', position: 'sticky', top: '20px', zIndex: 100 }}>
+        <div className="no-print" style={{ textAlign: 'center', position: 'sticky', top: '20px', zIndex: 100, marginBottom: '20px' }}>
           <div style={{ background: '#2563eb', color: 'white', padding: '15px 30px', borderRadius: '50px', display: 'inline-flex', alignItems: 'center', gap: '15px', boxShadow: '0 10px 25px rgba(37,99,235,0.4)' }}>
             <div>
               <div style={{ fontWeight: '900', fontSize: '12px' }}>LOTE DE IMPRESIÓN</div>

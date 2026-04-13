@@ -26,14 +26,13 @@ export default async function IndividualReportPage({ params }: { params: Promise
     <>
       <style>{`
         @media print {
-          @page { margin: 0; size: auto; }
+          @page { margin: 0 !important; size: A4; }
           body { margin: 0 !important; padding: 0 !important; background: white !important; }
           .no-print { display: none !important; }
-          .page-root { padding: 0 !important; margin: 0 !important; background: white !important; min-height: 0 !important; }
+          .page-root { padding: 0 !important; margin: 0 !important; background: white !important; }
         }
       `}</style>
 
-      {/* Container - Usamos min-h-screen pero sin forzar overflows en impresión */}
       <div className="page-root" style={{ background: '#f1f5f9', padding: '0', minHeight: '100vh', fontFamily: 'sans-serif' }}>
         <div className="no-print" style={{ textAlign: 'center', padding: '15px' }}>
           <ClientPrint />
