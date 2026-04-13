@@ -30,13 +30,6 @@ export default async function IndividualReportPage({ params }: { params: Promise
           body { margin: 0 !important; padding: 0 !important; background: white !important; }
           .no-print { display: none !important; }
           .page-root { padding: 0 !important; margin: 0 !important; background: white !important; min-height: 0 !important; }
-          .acuse-sheet { 
-            box-shadow: none !important; 
-            width: 100% !important; 
-            margin: 0 !important; 
-            padding: 10mm 12mm !important; 
-            min-height: 0 !important;
-          }
         }
       `}</style>
 
