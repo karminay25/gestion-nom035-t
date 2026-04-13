@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { calculateNOM035, checkATS } from '@/lib/nom035/evaluator';
