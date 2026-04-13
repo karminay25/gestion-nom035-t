@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, FileText, AlertTriangle, RefreshCw, ChevronRight, ChevronLeft, Search, Building2, Clock, CheckCircle2, X, BarChart, Copy, Printer, Info, Download } from 'lucide-react';
+import { Users, FileText, AlertTriangle, RefreshCw, ChevronRight, ChevronLeft, Search, Building2, Clock, CheckCircle2, X, BarChart, Copy, Printer, Info, Download, ShieldAlert, HeartPulse } from 'lucide-react';
 import type { Employee } from '@/lib/nom035/sync-agent';
+import { calculateNOM035 } from '@/lib/nom035/evaluator';
 
 const PAGE_SIZE = 20;
 
@@ -592,12 +593,53 @@ export default function AdminDashboard() {
                            <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mb-6">
                              Aplicado: {new Date(surveyDetails.completed_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}
                            </p>
+                           
+                           {/* Análisis de Dominios */}
+                           <div className="mb-8 text-left">
+                             <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                               <ShieldAlert className="w-3 h-3" /> Desglose por Dominios
+                             </h4>
+                             <div className="grid grid-cols-1 gap-2">
+                               {calculateNOM035(surveyDetails.guide_type, surveyDetails.answers)?.domains.map((d: any) => (
+                                 <div key={d.name} className="flex justify-between items-center p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                                   <span className="text-[10px] font-bold text-gray-400 max-w-[70%]">{d.name}</span>
+                                   <span className={`text-[10px] font-black uppercase ${
+                                     d.riskLevel === 'Muy Alto' ? 'text-red-500' :
+                                     d.riskLevel === 'Alto' ? 'text-orange-500' :
+                                     d.riskLevel === 'Medio' ? 'text-yellow-500' : 'text-green-500'
+                                   }`}>{d.riskLevel}</span>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+
+                           {/* Plan de Acción */}
+                           <div className="mb-8 text-left bg-blue-600/10 border border-blue-500/20 p-6 rounded-[2rem]">
+                             <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                               <HeartPulse className="w-3 h-3" /> Plan de Acción Recomendado
+                             </h4>
+                             <p className="text-[11px] text-gray-300 leading-relaxed font-medium">
+                               {surveyDetails.risk_level === 'Muy Alto' || surveyDetails.risk_level === 'Alto' ? 
+                                 'Intervención inmediata: Realizar entrevistas profundas, referir a especialistas clínicos (Nivel 1) y revisar cargas de trabajo en el área.' :
+                                 surveyDetails.risk_level === 'Medio' ? 
+                                 'Medidas de control: Implementar programas de sensibilización y capacitación de liderazgo para el jefe directo.' :
+                                 'Medidas preventivas: Mantener el entorno favorable y difundir periódicamente la política de prevención.'
+                               }
+                             </p>
+                             {surveyDetails.ats_result === 'REQUIERE_ATENCION' && (
+                               <p className="mt-3 text-[11px] text-red-400 font-bold">
+                                 ⚠️ Nota: Requiere canalización médica obligatoria por Guía I.
+                               </p>
+                             )}
+                           </div>
+
                            <button 
                             onClick={() => window.open(`/admin/report/${selectedEmployee.id}`, '_blank')}
                             className="w-full bg-white text-black font-black py-5 rounded-3xl flex items-center justify-center gap-3 hover:bg-gray-200 transition-all active:scale-95 shadow-2xl"
                           >
-                            <Printer className="w-5 h-5" /> Acuse de Recibo PDF
+                            <Printer className="w-5 h-5" /> Generar Dictamen Legal PDF
                           </button>
+                          <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-4">Las respuestas individuales exactas se encuentran en el PDF.</p>
                         </div>
                       </div>
                     ) : (

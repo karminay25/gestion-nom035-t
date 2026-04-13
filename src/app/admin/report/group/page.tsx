@@ -97,7 +97,7 @@ export default async function GroupReportPage({ searchParams }: { searchParams: 
 
   return (
     <div className="min-h-screen bg-gray-50 text-black p-10 font-sans print:p-0 print:bg-white text-sm">
-      <div className="max-w-5xl mx-auto bg-white p-12 shadow-2xl rounded-3xl border border-gray-100 print:shadow-none print:border-none">
+      <div className="max-w-5xl mx-auto bg-white p-8 shadow-2xl rounded-3xl border border-gray-100 print:shadow-none print:border-none">
         
         <div className="no-print mb-8 text-center">
           <ClientPrint />
@@ -267,15 +267,15 @@ export default async function GroupReportPage({ searchParams }: { searchParams: 
         </div>
 
         {/* Firmas */}
-        <div className="flex flex-col items-center justify-center mt-20">
+        <div className="flex flex-col items-center justify-center mt-8">
             <div className="w-64 border-b-2 border-black mb-3" />
             <p className="font-black text-sm uppercase">Recursos Humanos</p>
             <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-1">Sello y Firma de Validación NOM-035</p>
-            <p className="text-gray-300 text-[9px] mt-4 italic font-medium">Documento generado el {new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+            <p className="text-gray-300 text-[9px] mt-2 italic font-medium">Documento generado el {new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
         </div>
 
         {/* Footer Audit */}
-        <footer className="mt-16 pt-8 border-t border-gray-100 text-center text-[8px] text-gray-400 font-medium space-y-1">
+        <footer className="mt-6 pt-4 border-t border-gray-100 text-center text-[8px] text-gray-400 font-medium space-y-1">
           <p>Evidencia colectiva automatizada conforme a la NOM-035-STPS-2018 (Numerales 7.1, 7.2 y 8.1).</p>
           <p>Este informe constituye el Diagnóstico de Seguridad y Salud en el Trabajo requerido por el Reglamento Federal de Seguridad y Salud en el Trabajo.</p>
         </footer>
