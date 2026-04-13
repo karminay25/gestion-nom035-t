@@ -145,10 +145,14 @@ export default function NOM035Report({ survey }: { survey: any }) {
                 { l: 'Código / Nómina', v: emp.code },
                 { l: 'Puesto Actual', v: emp.position },
                 { l: 'Departamento', v: emp.department },
+                { l: 'Sexo', v: survey.answers['v_genero'] === 'M' ? 'Masculino' : survey.answers['v_genero'] === 'F' ? 'Femenino' : 'N/A' },
+                { l: 'Edad', v: survey.answers['v_edad'] ? `${survey.answers['v_edad']} años` : 'N/A' },
                 { l: 'Razón Social', v: companyInfo.razonSocial },
                 { l: 'Fecha de Ingreso', v: fechaIngreso },
+                { l: 'RFC Empresa', v: companyInfo.rfc },
+                { l: 'Registro Patronal IMSS', v: companyInfo.registroPatronal },
               ].map((item, i) => (
-                <div key={i} style={{ padding: '8px 15px', borderBottom: i < 4 ? '1.5px solid #e2e8f0' : 'none', borderRight: i % 2 === 0 ? '1.5px solid #e2e8f0' : 'none' }}>
+                <div key={i} style={{ padding: '8px 15px', borderBottom: i < 8 ? '1.5px solid #e2e8f0' : 'none', borderRight: i % 2 === 0 ? '1.5px solid #e2e8f0' : 'none' }}>
                   <div style={{ fontSize: '8px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>{item.l}</div>
                   <div style={{ fontSize: '11.5px', fontWeight: 700 }}>{item.v}</div>
                 </div>
