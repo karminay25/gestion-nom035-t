@@ -100,7 +100,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
     if (val === undefined || val === null) return 'N/A';
     if (q.type === 'yesno') return val === 'si' ? 'SÍ' : 'NO';
     if (q.type === 'likert') {
-      const labels = ['Siempre', 'Casi siempre', 'algunas veces', 'Casi nunca', 'Nunca'];
+      const labels = ['Nunca', 'Casi nunca', 'Algunas veces', 'Casi siempre', 'Siempre'];
       return labels[parseInt(val)] || val;
     }
     return val.toString();
