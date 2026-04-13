@@ -275,32 +275,24 @@ export default function NOM035Report({ survey }: { survey: any }) {
         @media print {
           .acuse-root { padding: 0 !important; background: transparent !important; }
           .acuse-sheet { 
-            padding: 15mm 20mm !important; 
+            padding: 10mm 15mm !important; 
             margin: 0 !important; 
-            width: 210mm !important; 
-            min-height: 296mm !important; 
+            width: 100% !important; 
+            height: 275mm !important; 
+            min-height: 275mm !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
             box-shadow: none !important; 
             break-inside: avoid !important;
-            transform: scale(0.92) !important;
-            transform-origin: top center !important;
-            page-break-after: always !important;
+            zoom: 0.95;
+            page-break-after: avoid !important;
           }
           .details-anexo {
-            margin: 0 !important;
-            padding: 15mm 20mm !important;
-            width: 210mm !important;
-            min-height: 296mm !important;
-            border: none !important;
-            box-shadow: none !important;
-            page-break-before: always !important;
-            transform: scale(0.92) !important;
-            transform-origin: top center !important;
+            display: none !important;
           }
           .no-print { display: none !important; }
-          body { margin: 0 !important; overflow: visible !important; }
+          body { margin: 0 !important; overflow: hidden !important; }
           @page { margin: 0 !important; size: A4; }
         }
       `}</style>
