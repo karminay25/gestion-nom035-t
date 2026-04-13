@@ -3,17 +3,18 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { calculateNOM035, checkATS } from '@/lib/nom035/evaluator';
-import { GUIDE_I, GUIDE_III, Question } from '@/lib/nom035/questions';
+import { GUIDE_III, Question } from '@/lib/nom035/questions';
 
 // ── Helpers Legales ──────────────────────────────────────────────────────────
 
 function riskColor(level: string) {
   switch (level) {
-    case 'Muy Alto': return '#b91c1c';
-    case 'Alto':     return '#c2410c';
-    case 'Medio':    return '#a16207';
-    case 'Bajo':     return '#15803d';
-    default:         return '#1d4ed8';
+    case 'Muy Alto': return '#7f1d1d';
+    case 'Alto':     return '#9a3412';
+    case 'Medio':    return '#854d0e';
+    case 'Bajo':     return '#166534';
+    case 'Nulo':     return '#15803d';
+    default:         return '#1e40af';
   }
 }
 
@@ -23,65 +24,22 @@ function riskBg(level: string) {
     case 'Alto':     return '#fff7ed';
     case 'Medio':    return '#fefce8';
     case 'Bajo':     return '#f0fdf4';
-    default:         return '#f0f9ff';
-  }
-}
-
-function getMedidas(level: string): { tipo: string; items: string[] } {
-  switch (level) {
-    case 'Nulo':
-      return {
-        tipo: 'Medidas de Prevención (Riesgo Nulo)',
-        items: [
-          'Difundir la política de riesgos psicosociales.',
-          'Promover un entorno organizacional favorable.',
-          'Mantener mecanismos de comunicación.'
-        ]
-      };
-    case 'Bajo':
-      return {
-        tipo: 'Acciones Preventivas (Riesgo Bajo)',
-        items: [
-          'Sensibilizar sobre violencia y apoyo social.',
-          'Reforzar la política de prevención.',
-          'Mantener vigilancia periódica de factores.'
-        ]
-      };
-    case 'Medio':
-      return {
-        tipo: 'Acciones de Control (Riesgo Medio)',
-        items: [
-          'Revisar distribución de cargas y tiempos.',
-          'Implementar participación proactiva.',
-          'Capacitar jefes en liderazgo y manejo.'
-        ]
-      };
-    case 'Alto':
-    case 'Muy Alto':
-      return {
-        tipo: 'Acciones Prioritarias (Riesgo Alto/Muy Alto)',
-        items: [
-          'Análisis de dominios con riesgo alto.',
-          'Referir al trabajador a valoración médica.',
-          'Intervención organizacional e inmediata.'
-        ]
-      };
-    default:
-      return { tipo: 'Acciones Generales', items: ['Seguir lo dispuesto en la NOM-035.'] };
+    case 'Nulo':     return '#f0fdf4';
+    default:         return '#eff6ff';
   }
 }
 
 function getFormalConclusion(level: string, score: number, hasATS: boolean): string {
-  const base = `Resultados NOM-035: ${score} pts (**RIESGO ${level.toUpperCase()}**). `;
+  const base = `Evaluación integral basada en la NOM-035-STPS-2018. El colaborador presenta un puntaje total de ${score.toFixed(0)} unidades, lo que representa un **RIESGO ${level.toUpperCase()}**. `;
   let msg = '';
   switch (level) {
-    case 'Nulo': msg = 'No requiere acciones de control específicas.'; break;
-    case 'Bajo': msg = 'Requiere difusión y sensibilización general.'; break;
-    case 'Medio': msg = 'Necesario implementar programas de capacitación.'; break;
-    case 'Alto': msg = 'Urgente realizar análisis y medidas correctivas.'; break;
-    case 'Muy Alto': msg = 'Intervención inmediata para mitigar riesgos.'; break;
+    case 'Nulo': msg = 'No se requiere intervención; mantener clima laboral.'; break;
+    case 'Bajo': msg = 'Acciones preventivas de sensibilización recomendadas.'; break;
+    case 'Medio': msg = 'Se recomienda implementar un programa de intervención específico.'; break;
+    case 'Alto': msg = 'Intervención necesaria y revisión de factores de riesgo.'; break;
+    case 'Muy Alto': msg = 'Atención inmediata y programa integral de mitigación.'; break;
   }
-  if (hasATS) msg += ' Requiere canalización médica (Guía I).';
+  if (hasATS) msg += ' Se detectó sintomatología de Acontecimiento Traumático Severo (Guía I).';
   return base + msg;
 }
 
@@ -113,169 +71,201 @@ export default function NOM035Report({ survey }: { survey: any }) {
   const compKey = isLola ? 'LOLA' : 'BOSBES';
   const companyInfo = COMPANY_DATA[compKey] || COMPANY_DATA['LOLA'];
 
-  const fechaEncuesta = new Date(survey.completed_at).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const fechaEncuesta = new Date(survey.completed_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
   const entryDate = emp.entryDate || emp.entry_date;
-  const fechaIngreso = entryDate ? new Date(entryDate).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A';
+  const fechaIngreso = entryDate ? new Date(entryDate).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }) : 'N/A';
 
   const getAnswerLabel = (q: Question, val: any) => {
     if (val === undefined || val === null) return 'N/A';
     if (q.type === 'yesno') return val === 'si' ? 'SÍ' : 'NO';
     if (q.type === 'likert') {
-      const labels = ['Siempre', 'Casi siempre', 'Algunas veces', 'Casi nunca', 'Nunca'];
+      const labels = ['Siempre', 'Casi siempre', 'algunas veces', 'Casi nunca', 'Nunca'];
       return labels[parseInt(val)] || val;
     }
     return val.toString();
   };
 
   return (
-    <div className="acuse-root" style={{ display: 'flex', flexDirection: 'column', gap: '0', width: '210mm', margin: '0 auto' }}>
+    <div className="acuse-root" style={{ width: '210mm', margin: '0 auto', background: '#e5e7eb', padding: '20px 0' }}>
       <div className="acuse-sheet" style={{
-        width: '100%', height: '290mm', background: '#fff',
-        padding: '5mm 10mm', boxSizing: 'border-box',
-        position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column'
+        width: '210mm', minHeight: '290mm', background: '#fff',
+        margin: '0 auto', padding: '15mm 15mm', boxSizing: 'border-box',
+        display: 'flex', flexDirection: 'column', color: '#000', fontFamily: 'sans-serif'
       }}>
-        {/* Header Superior Compacto */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '6.5px', color: '#9ca3af', textTransform: 'uppercase', borderBottom: '0.5px solid #f3f4f6', paddingBottom: '2px', marginBottom: '5px' }}>
-          <div>NOM-035-STPS-2018 | Diagnóstico Individual</div>
-          <div style={{ fontWeight: 800 }}>MÉTODO: DIGITAL | AÑO: 2026</div>
-        </div>
-
-        {/* Encabezado Logo */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ width: '38px', height: '38px', position: 'relative' }}>
-              <Image src={companyInfo.logo} alt="L" fill style={{ objectFit: 'contain' }} />
+        
+        {/* Header - Institucional */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #000', paddingBottom: '15px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <div style={{ width: '55px', height: '55px', position: 'relative' }}>
+              <Image src={companyInfo.logo} alt="Logo" fill style={{ objectFit: 'contain' }} />
             </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: '13px', fontWeight: 900, color: '#111827' }}>Acuse de Evaluación</h1>
-              <p style={{ margin: 0, fontSize: '8px', color: '#6b7280', fontWeight: 600 }}>Guía de Referencia III</p>
+              <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.5px' }}>Acuse de Evaluación Individual</h1>
+              <p style={{ margin: 0, fontSize: '10px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Norma Oficial Mexicana NOM-035-STPS-2018</p>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '9px', fontWeight: 900, color: '#111827' }}>FOLIO: {survey.id.toString().padStart(6, '0')}</div>
-            <div style={{ fontSize: '7.5px', color: '#6b7280' }}>Fecha: {fechaEncuesta}</div>
+            <div style={{ fontSize: '12px', fontWeight: 900 }}>FOLIO: <span style={{ color: '#2563eb' }}>{survey.id.toString().padStart(6, '0')}</span></div>
+            <div style={{ fontSize: '9px', fontWeight: 700, color: '#64748b', marginTop: '4px' }}>FECHA: {fechaEncuesta}</div>
           </div>
         </div>
 
-        {/* Contexto Minimal */}
-        <div style={{ background: '#f9fafb', padding: '4px 8px', borderRadius: '4px', border: '1px solid #f3f4f6', marginBottom: '6px', fontSize: '7.2px', color: '#4b5563', lineHeight: '1.2' }}>
-          Evaluación técnica NOM-035 (Guía III). Aplicación obligatoria, voluntaria y confidencial (numeral 7.2).
+        {/* Bloque Legal */}
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px', marginBottom: '20px', fontSize: '9.5px', lineHeight: '1.4', color: '#334155' }}>
+          En cumplimiento con los numerales 7.1 y 7.2 de la Norma Oficial Mexicana <strong>NOM-035-STPS-2018</strong>, se hace entrega de los resultados individuales obtenidos mediante la aplicación de la Guía de Referencia III. Esta información es de carácter confidencial y tiene como fin la identificación y prevención de factores de riesgo psicosocial.
         </div>
 
-        {/* 1. Datos Identificación */}
-        <div style={{ marginBottom: '6px', breakInside: 'avoid' }}>
-          <div style={{ fontSize: '8px', fontWeight: 900, marginBottom: '3px', textTransform: 'uppercase', borderLeft: '2px solid #111827', paddingLeft: '5px' }}>1. Información General</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', border: '1px solid #e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+        {/* 1. Datos del Trabajador */}
+        <div style={{ marginBottom: '25px' }}>
+          <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', borderLeft: '4px solid #000', paddingLeft: '8px', marginBottom: '10px' }}>1. Identificación del Colaborador</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
             {[
-              { l: 'Colaborador', v: emp.fullName || emp.full_name },
-              { l: 'Edad / Género', v: `${survey.answers['v_edad'] || 'N/A'} / ${survey.answers['v_genero'] === 'M' ? 'M' : 'F'}` },
-              { l: 'Puesto', v: emp.position },
-              { l: 'Cód. empleado', v: emp.code },
+              { l: 'Nombre Completo', v: emp.fullName || emp.full_name },
+              { l: 'Código / Nómina', v: emp.code },
+              { l: 'Puesto Actual', v: emp.position },
               { l: 'Departamento', v: emp.department },
-              { l: 'Fecha ingreso', v: fechaIngreso },
-              { l: 'Razón Social', v: companyInfo.razonSocial },
-              { l: 'RFC Empresa', v: companyInfo.rfc },
-            ].map(({ l, v }, i) => (
-              <div key={l} style={{ padding: '3px 6px', background: i % 2 === 0 ? '#fff' : '#f9fafb', borderRight: (i + 1) % 4 !== 0 ? '1px solid #e5e7eb' : 'none', borderTop: i >= 4 ? '1px solid #e5e7eb' : 'none' }}>
-                <div style={{ color: '#6b7280', fontSize: '5.5px', fontWeight: 800, textTransform: 'uppercase' }}>{l}</div>
-                <div style={{ fontWeight: 700, color: '#111827', fontSize: '7.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</div>
+              { l: 'Empresa', v: companyInfo.razonSocial },
+              { l: 'Fecha de Ingreso', v: fechaIngreso },
+            ].map((item, i) => (
+              <div key={i} style={{ padding: '8px 12px', borderBottom: i < 4 ? '1px solid #e2e8f0' : 'none', borderRight: i % 2 === 0 ? '1px solid #e2e8f0' : 'none' }}>
+                <div style={{ fontSize: '8px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '2px' }}>{item.l}</div>
+                <div style={{ fontSize: '10px', fontWeight: 700 }}>{item.v}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 2. Resultados Clave */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '8px', marginBottom: '8px', breakInside: 'avoid' }}>
-          <div style={{ border: '1px solid #111827', borderRadius: '6px', padding: '6px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '2px', height: '100%', background: riskColor(results.riskLevel) }} />
-            <div style={{ fontSize: '7.5px', fontWeight: 900, color: '#6b7280', textTransform: 'uppercase' }}>Riesgo Global</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px' }}>
-              <div style={{ fontSize: '20px', fontWeight: 900 }}>{results.score.toFixed(0)}</div>
-              <div style={{ fontSize: '6.5px', fontWeight: 600, color: '#9ca3af' }}>/ 288 pts</div>
-            </div>
-            <div style={{ fontSize: '8.5px', fontWeight: 900, color: riskColor(results.riskLevel), background: riskBg(results.riskLevel), padding: '1px 5px', borderRadius: '3px', textTransform: 'uppercase', display: 'inline-block' }}>
+        {/* 2. Resultados Globales */}
+        <div style={{ marginBottom: '25px', display: 'grid', gridTemplateColumns: '180px 1fr', gap: '20px' }}>
+          <div style={{ border: '2px solid #000', borderRadius: '12px', padding: '15px', textAlign: 'center' }}>
+            <p style={{ fontSize: '9px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Riesgo Organizacional</p>
+            <div style={{ fontSize: '40px', fontWeight: 900, lineHeight: 1, marginBottom: '8px' }}>{results.score.toFixed(0)}</div>
+            <div style={{ 
+              fontSize: '11px', 
+              fontWeight: 900, 
+              padding: '4px 10px', 
+              borderRadius: '6px', 
+              textTransform: 'uppercase', 
+              color: '#fff',
+              backgroundColor: riskColor(results.riskLevel)
+            }}>
               {results.riskLevel}
             </div>
+            <p style={{ fontSize: '8px', color: '#94a3b8', marginTop: '10px', fontWeight: 700 }}>Puntaje Bruto Tot. (Máx. 288)</p>
           </div>
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: '6px', padding: '6px' }}>
-            <div style={{ fontSize: '7.8px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '2px' }}>Conclusión</div>
-            <p style={{ margin: 0, fontSize: '7.5px', color: '#374151', lineHeight: '1.2', fontStyle: 'italic' }}>
-              "{getFormalConclusion(results.riskLevel, results.score, hasATS)}"
+          <div style={{ padding: '10px 0' }}>
+            <h3 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '8px' }}>Dictamen Técnico:</h3>
+            <p style={{ fontSize: '10px', lineHeight: '1.5', color: '#1e293b' }}>
+              {getFormalConclusion(results.riskLevel, results.score, hasATS)}
             </p>
           </div>
         </div>
 
-        {/* 4. Desglose de Dominios */}
-        <div style={{ marginBottom: '8px', breakInside: 'avoid' }}>
-          <div style={{ fontSize: '8px', fontWeight: 900, marginBottom: '4px', textTransform: 'uppercase', borderLeft: '2px solid #111827', paddingLeft: '5px' }}>2. Desglose de Dominios</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px' }}>
-            {results.domains.map((d: any) => (
-              <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2px 6px', border: '1px solid #e5e7eb', borderRadius: '4px', fontSize: '7.2px' }}>
-                <span style={{ color: '#4b5563', fontWeight: 600, maxWidth: '65%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.name}</span>
-                <span style={{ fontWeight: 800, color: riskColor(d.riskLevel), background: riskBg(d.riskLevel), padding: '1px 4px', borderRadius: '2px', fontSize: '6.8px' }}>{d.score} | {d.riskLevel}</span>
+        {/* 3. Análisis por Dominios */}
+        <div style={{ marginBottom: '25px' }}>
+          <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', borderLeft: '4px solid #000', paddingLeft: '8px', marginBottom: '10px' }}>2. Análisis de Factores de Riesgo (Dominios)</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {results.domains.map((d: any, i: number) => (
+              <div key={i} style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '10px 12px', 
+                background: riskBg(d.riskLevel), 
+                border: `1px solid ${riskColor(d.riskLevel)}20`, 
+                borderRadius: '8px' 
+              }}>
+                <span style={{ fontSize: '9.5px', fontWeight: 700, color: '#334155', maxWidth: '70%', lineHeight: 1.2 }}>{d.name}</span>
+                <span style={{ 
+                  fontSize: '9px', 
+                  fontWeight: 900, 
+                  color: riskColor(d.riskLevel),
+                  textTransform: 'uppercase'
+                }}>{d.riskLevel}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 5. Acciones */}
-        <div style={{ border: '1px solid #111827', borderRadius: '6px', padding: '6px', marginBottom: '8px', breakInside: 'avoid' }}>
-          <div style={{ fontSize: '8px', fontWeight: 900, marginBottom: '3px', textTransform: 'uppercase' }}>3. {getMedidas(results.riskLevel).tipo}</div>
-          <ul style={{ margin: 0, paddingLeft: '11px', fontSize: '7.5px', color: '#111827', lineHeight: '1.2', columns: 2 }}>
-            {getMedidas(results.riskLevel).items.slice(0, 4).map((item, idx) => (
-              <li key={idx} style={{ marginBottom: '1px' }}>{item}</li>
-            ))}
-            {hasATS && <li style={{ color: '#dc2626', fontWeight: 800 }}>Canalización clínica prioritaria.</li>}
+        {/* 4. Medidas y Compromisos */}
+        <div style={{ border: '1px solid #000', borderRadius: '12px', padding: '15px', marginBottom: '25px' }}>
+          <h2 style={{ fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', marginBottom: '12px' }}>3. Acciones de Prevención y Control</h2>
+          <p style={{ fontSize: '10px', marginBottom: '10px', fontStyle: 'italic', fontWeight: 600 }}>Basado en el nivel de riesgo detectado, la organización se compromete a:</p>
+          <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '10px', lineHeight: '1.6' }}>
+            <li>Difundir y revisar la Política de Prevención de Riesgos Psicosociales.</li>
+            <li>Proporcionar mecanismos seguros para la recepción de quejas o sugerencias.</li>
+            {results.riskLevel !== 'Nulo' && results.riskLevel !== 'Bajo' && (
+              <>
+                <li>Realizar una revisión técnica de la carga de trabajo y jornadas laborales.</li>
+                <li>Implementar programas de capacitación en liderazgo y apoyo social.</li>
+              </>
+            )}
+            {hasATS && <li style={{ color: '#b91c1c', fontWeight: 900 }}>REFERENCIA MÉDICA: Canalizar al trabajador para valoración clínica especializada.</li>}
           </ul>
         </div>
 
-        {/* Firmas */}
-        <div style={{ marginTop: 'auto', paddingBottom: '6mm', breakInside: 'avoid' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-            {[
-              { name: emp.fullName || emp.full_name, lbl: 'Firma del Trabajador' },
-              { name: 'RECURSOS HUMANOS', lbl: 'Dpto. Seguridad y Salud' },
-            ].map(({ name, lbl }) => (
-              <div key={lbl} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ width: '85%', borderBottom: '1px solid #111827', marginBottom: '3px' }} />
-                <div style={{ fontSize: '7.8px', fontWeight: 800, textAlign: 'center', textOverflow: 'ellipsis', overflow: 'hidden', width: '100%', whiteSpace: 'nowrap' }}>{name}</div>
-                <div style={{ fontSize: '5.8px', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 900 }}>{lbl}</div>
+        {/* Firmas Espaciadas al Final */}
+        <div style={{ marginTop: 'auto', paddingTop: '40px', paddingBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '260px 260px', justifyContent: 'space-between' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ borderTop: '2px solid #000', marginTop: '40px', paddingTop: '10px' }}>
+                <p style={{ margin: 0, fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>{emp.fullName || emp.full_name}</p>
+                <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#64748b' }}>Firma del Trabajador</p>
               </div>
-            ))}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ borderTop: '2px solid #000', marginTop: '40px', paddingTop: '10px' }}>
+                <p style={{ margin: 0, fontSize: '11px', fontWeight: 900, textTransform: 'uppercase' }}>RECURSOS HUMANOS</p>
+                <p style={{ margin: 0, fontSize: '9px', fontWeight: 700, color: '#64748b' }}>Sello y Firma de Recepción</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Footer Pie */}
-        <footer style={{ position: 'absolute', bottom: '6mm', left: '10mm', right: '10mm', textAlign: 'center', fontSize: '6px', color: '#9ca3af', borderTop: '0.5px solid #f3f4f6', paddingTop: '4px' }}>
-          Válido para auditoría STPS. Registro Patronal: {companyInfo.registroPatronal} | Periodo 2026.
+        {/* Footer Audit */}
+        <footer style={{ marginTop: 'auto', textAlign: 'center', fontSize: '8px', color: '#94a3b8', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
+          Documento válido para auditoría STPS conforme a NOM-035-STPS-2018. Registro Patronal: {companyInfo.registroPatronal}.
         </footer>
+
       </div>
 
       <style jsx>{`
         @media print {
-          .acuse-root { margin: 0 !important; width: 100% !important; }
-          .acuse-sheet { padding: 5mm 10mm !important; border: none !important; height: auto !important; min-height: 290mm !important; }
+          .acuse-root { padding: 0 !important; background: transparent !important; }
+          .acuse-sheet { padding: 15mm 15mm !important; margin: 0 !important; width: 100% !important; min-height: 297mm !important; box-shadow: none !important; }
           .no-print { display: none !important; }
+          body { margin: 0 !important; }
         }
       `}</style>
 
-      {/* Solo Web */}
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', margin: '15px' }}>
-        <button onClick={() => setShowDetails(!showDetails)} style={{ padding: '8px 16px', background: '#111827', color: 'white', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>
-          {showDetails ? 'Ocultar Detalle' : 'Ver Respuestas Detalladas'}
+      {/* Solo Web - Ver Detalles */}
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', margin: '30px' }}>
+        <button 
+          onClick={() => setShowDetails(!showDetails)} 
+          style={{ 
+            padding: '12px 24px', 
+            background: '#000', 
+            color: '#fff', 
+            borderRadius: '12px', 
+            fontSize: '13px', 
+            fontWeight: 800,
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          {showDetails ? 'Ver Dictamen (Vista Previa)' : 'Ver Respuestas Detalladas (Anexo)'}
         </button>
       </div>
 
       {showDetails && (
-        <div className="details-anexo" style={{ width: '210mm', margin: '0 auto 40px auto', background: '#fff', padding: '10mm 15mm', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '10px', borderBottom: '2px solid #111827' }}>ANEXO TÉCNICO</div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px' }}>
+        <div className="details-anexo" style={{ width: '210mm', margin: '0 auto 50px auto', background: '#fff', padding: '20px 40px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 900, marginBottom: '15px', borderBottom: '2px solid #000', paddingBottom: '5px' }}>ANEXO TÉCNICO: Respuestas del Cuestionario</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
             <tbody>
-              {GUIDE_III.flatMap(s => s.questions).map(q => (
-                <tr key={q.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '3px 0', color: '#6b7280' }}>{q.text}</td>
-                  <td style={{ padding: '3px 0', fontWeight: 700, textAlign: 'right' }}>{getAnswerLabel(q, survey.answers[q.id])}</td>
+              {GUIDE_III.flatMap(s => s.questions).map((q, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '8px 0', color: '#64748b', fontWeight: 600 }}>{q.text}</td>
+                  <td style={{ padding: '8px 0', fontWeight: 800, textAlign: 'right', whiteSpace: 'nowrap' }}>{getAnswerLabel(q, survey.answers[q.id])}</td>
                 </tr>
               ))}
             </tbody>

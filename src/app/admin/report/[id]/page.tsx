@@ -33,8 +33,9 @@ export default async function IndividualReportPage({ params }: { params: Promise
         }
       `}</style>
 
-      <div className="page-root" style={{ background: '#e5e7eb', padding: '20px 0', minHeight: '100vh', fontFamily: 'Arial, Helvetica, sans-serif' }}>
-        <div className="no-print" style={{ textAlign: 'center', marginBottom: '12px' }}>
+      {/* Container - Usamos min-h-screen pero sin forzar overflows en impresión */}
+      <div className="page-root" style={{ background: '#f1f5f9', padding: '0', minHeight: '100vh', fontFamily: 'sans-serif' }}>
+        <div className="no-print" style={{ textAlign: 'center', padding: '15px' }}>
           <ClientPrint />
         </div>
 
