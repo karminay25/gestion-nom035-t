@@ -41,8 +41,10 @@ export function getRiskLevel(score: number, thresholds: number[]): RiskLevel {
  * Valida si el cuestionario de Guía III está completo
  */
 function isGuideIIIComplete(answers: Record<string, any>): boolean {
+  if (!answers || typeof answers !== 'object') return false;
   for (const qId of QUESTIONS_MAP.keys()) {
-    if (answers[qId] === undefined || answers[qId] === null) return false;
+    const val = answers[qId];
+    if (val === undefined || val === null || val === '') return false;
   }
   return true;
 }
@@ -62,12 +64,16 @@ export function calculateNOM035(guideType: string, answers: Record<string, any>)
 
   Object.entries(answers).forEach(([qId, value]) => {
     const question = QUESTIONS_MAP.get(qId);
-    if (question && typeof value === 'number') {
-      const score = question.reverse ? (4 - value) : value;
-      totalScore += score;
-      
-      if (question.domain && domainScores[question.domain] !== undefined) {
-        domainScores[question.domain] += score;
+    if (question) {
+      // CONVERSIÓN RÍGIDA: Previene bug donde respuestas históricas ("4" texto) eran ignoradas
+      const numValue = Number(value);
+      if (!isNaN(numValue)) {
+        const score = question.reverse ? (4 - numValue) : numValue;
+        totalScore += score;
+        
+        if (question.domain && domainScores[question.domain] !== undefined) {
+          domainScores[question.domain] += score;
+        }
       }
     }
   });

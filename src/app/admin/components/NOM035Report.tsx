@@ -75,7 +75,17 @@ export default function NOM035Report({ survey }: { survey: any }) {
   const results = calculateNOM035(survey.guide_type, survey.answers);
   const ats = getATSDetails(survey.answers);
 
-  if (!results) return null;
+  if (!results) {
+    return (
+      <div style={{ padding: '20px', maxWidth: '800px', margin: '40px auto', background: '#fee2e2', color: '#991b1b', border: '2px solid #ef4444', borderRadius: '12px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+        <h2 style={{ margin: '0 0 10px 0', fontSize: '20px', fontWeight: 900, textTransform: 'uppercase' }}>⚠️ Evaluación Incompleta</h2>
+        <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.5' }}>
+          Este colaborador tiene respuestas faltantes o inválidas en la Guía III de la NOM-035. <br/>
+          Por razones de integridad matemática y legal, <strong>no es posible generar un dictamen de riesgo</strong>.
+        </p>
+      </div>
+    );
+  }
 
   const rawCompany = emp.company || '';
   const isLola = rawCompany.toUpperCase().includes('LOLA');
