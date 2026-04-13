@@ -343,6 +343,7 @@ export default function AdminDashboard() {
                     <input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size > 0 && selectedIds.size === filteredEmployees.length} className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600" />
                   </th>
                   <th className="px-6 py-5">Colaborador</th>
+                  <th className="px-6 py-5">Puesto</th>
                   <th className="px-6 py-5">Ubicación</th>
                   <th className="px-6 py-5 text-center">Estatus</th>
                   <th className="px-6 py-5 text-center">Riesgo</th>
@@ -376,6 +377,9 @@ export default function AdminDashboard() {
                             <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1">{emp.code}</div>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-6 text-xs text-gray-300 font-medium">
+                        {emp.position}
                       </td>
                       <td className="px-6 py-6">
                         <div className="text-[10px] font-black text-blue-500 uppercase mb-1">{emp.company}</div>
@@ -457,22 +461,26 @@ export default function AdminDashboard() {
           <div className="bg-white/5 border border-white/10 p-8 rounded-3xl shadow-2xl">
             <h3 className="text-xl font-black mb-6 tracking-tight">Reportes de Auditoría</h3>
             <div className="space-y-4">
-              <a 
-                href="/admin/report/group" 
-                target="_blank"
-                className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:border-blue-500/30 transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center">
-                    <BarChart className="w-6 h-6 text-blue-500" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black">Dictamen Grupal</p>
-                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Global 2026</p>
-                  </div>
+              <div className="bg-black/20 rounded-2xl border border-white/5 overflow-hidden">
+                <div className="p-4 border-b border-white/5 flex items-center gap-3">
+                  <BarChart className="w-5 h-5 text-red-500" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Dictámenes Grupales</p>
                 </div>
-                <ChevronRight className="w-5 h-5 opacity-20 group-hover:opacity-100 transition-all" />
-              </a>
+                <div className="grid grid-cols-1 divide-y divide-white/5">
+                  <a href="/admin/report/group" target="_blank" className="flex items-center justify-between p-4 hover:bg-white/5 transition-all group/item text-sm font-bold">
+                    <span>General (Consolidado)</span>
+                    <ChevronRight className="w-4 h-4 opacity-20 group-hover/item:opacity-100 transition-all" />
+                  </a>
+                  <a href="/admin/report/group?company=LOLA" target="_blank" className="flex items-center justify-between p-4 hover:bg-white/5 transition-all group/item text-sm">
+                    <span>Lola Berries</span>
+                    <ChevronRight className="w-4 h-4 opacity-20 group-hover/item:opacity-100 transition-all" />
+                  </a>
+                  <a href="/admin/report/group?company=BOSBES" target="_blank" className="flex items-center justify-between p-4 hover:bg-white/5 transition-all group/item text-sm">
+                    <span>Bosbes Berries</span>
+                    <ChevronRight className="w-4 h-4 opacity-20 group-hover/item:opacity-100 transition-all" />
+                  </a>
+                </div>
+              </div>
 
               <a 
                 href="/api/export"

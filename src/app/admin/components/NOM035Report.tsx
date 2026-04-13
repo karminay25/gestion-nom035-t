@@ -65,16 +65,18 @@ function getMedidas(level: string): { tipo: string; items: string[] } {
   }
 }
 
-const COMPANY_DATA: Record<string, { rfc: string; razonSocial: string; registroPatronal: string }> = {
+const COMPANY_DATA: Record<string, { rfc: string; razonSocial: string; registroPatronal: string; logo: string }> = {
   'LOLA': {
     rfc: 'LBE140327491',
     razonSocial: 'LOLA BERRIES S.P.R. DE R.L. DE C.V.',
     registroPatronal: 'C0314007135',
+    logo: '/lola.jpeg'
   },
   'BOSBES': {
     rfc: 'BBE161029DHA',
     razonSocial: 'BOSBES BERRIES SPR DE RL DE CV',
     registroPatronal: 'C0314584133',
+    logo: '/bosbes.jpeg'
   },
 };
 
@@ -128,9 +130,9 @@ export default function NOM035Report({ survey }: { survey: any }) {
   return (
     <div className="acuse-root" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
       <div className="acuse-sheet" style={{
-        width: '210mm', minHeight: '250mm', margin: '0 auto', background: '#fff',
-        padding: '11mm 14mm', boxSizing: 'border-box',
-        position: 'relative'
+        width: '210mm', height: '297mm', margin: '0 auto', background: '#fff',
+        padding: '10mm 15mm', boxSizing: 'border-box',
+        position: 'relative', overflow: 'hidden'
       }}>
         {/* Folio Superior */}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #e5e7eb', paddingBottom: '4px', marginBottom: '8px' }}>
@@ -140,9 +142,9 @@ export default function NOM035Report({ survey }: { survey: any }) {
 
         {/* Encabezado */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ width: '45px', height: '45px', position: 'relative' }}>
-              <Image src={isLola ? "/lola.jpeg" : "/bosbes.jpeg"} alt="Logo" fill style={{ objectFit: 'contain' }} />
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ width: '50px', height: '50px', position: 'relative' }}>
+              <Image src={companyInfo.logo} alt="Logo Empresa" fill style={{ objectFit: 'contain' }} />
             </div>
             <div>
               <h1 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: '#111827', letterSpacing: '-0.02em' }}>
@@ -167,7 +169,8 @@ export default function NOM035Report({ survey }: { survey: any }) {
               { l: 'Fecha de ingreso',v: fechaIngreso },
               { l: 'Puesto',          v: emp.position },
               { l: 'Departamento',    v: emp.department },
-              { l: 'Empresa',            v: companyInfo.razonSocial },
+              { l: 'Razón Social',       v: companyInfo.razonSocial },
+              { l: 'RFC Empresa',        v: companyInfo.rfc },
               { l: 'Cód. empleado',      v: emp.code },
             ].map(({ l, v }, i) => (
               <div key={l} style={{ padding: '5px 8px', background: i % 2 === 0 ? '#fff' : '#f9fafb', borderRight: (i + 1) % 4 !== 0 ? '1px solid #e5e7eb' : 'none', borderTop: i >= 4 ? '1px solid #e5e7eb' : 'none' }}>
@@ -189,7 +192,6 @@ export default function NOM035Report({ survey }: { survey: any }) {
                 Riesgo {results.riskLevel}
               </div>
             </div>
-            <p style={{ fontSize: '8px', color: '#6b7280', marginTop: '4px', lineHeight: '1.2' }}>Basado en la Guía III de la NOM-035 para centros de más de 50 trabajadores.</p>
           </div>
 
           {/* 3. Evento Traumático */}
@@ -198,8 +200,8 @@ export default function NOM035Report({ survey }: { survey: any }) {
             <div style={{ fontSize: '11px', fontWeight: 700, color: hasATS ? '#dc2626' : '#15803d', display: 'flex', alignItems: 'center', gap: '4px' }}>
               {hasATS ? '⚠ REQUIERE VALORACIÓN MÉDICA' : '✓ SIN EVENTOS DETECTADOS'}
             </div>
-            <p style={{ fontSize: '7.5px', color: hasATS ? '#b91c1c' : '#3f6212', marginTop: '4px', lineHeight: '1.2' }}>
-              {hasATS ? 'El trabajador presenció o sufrió un evento severo durante el trabajo y presenta síntomas de estrés post-traumático.' : 'No se detectaron síntomas que requieran atención clínica inmediata según los criterios de la Guía I.'}
+            <p style={{ fontSize: '7.5px', color: hasATS ? '#b91c1c' : '#3f6212', marginTop: '4px', lineHeight: '1.2', margin: 0 }}>
+              {hasATS ? 'El trabajador requiere derivación para su valoración médica.' : 'No se detectaron síntomas que requieran atención inmediata.'}
             </p>
           </div>
         </div>
@@ -207,9 +209,9 @@ export default function NOM035Report({ survey }: { survey: any }) {
         {/* 4. Resultados por Dominio */}
         <div style={{ marginBottom: '12px' }}>
           <div style={sectionTitleStyles}>4. Desglose por Dominios Legales</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
             {results.domains.map((d: any) => (
-              <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '8px' }}>
+              <div key={d.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 8px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '8px' }}>
                 <span style={{ color: '#4b5563', fontWeight: 600, maxWidth: '75%' }}>{d.name}</span>
                 <span style={{ fontWeight: 800, color: riskColor(d.riskLevel), background: riskBg(d.riskLevel), padding: '1px 5px', borderRadius: '3px', fontSize: '7.5px' }}>{d.riskLevel}</span>
               </div>
@@ -225,13 +227,13 @@ export default function NOM035Report({ survey }: { survey: any }) {
               <li key={idx} style={{ marginBottom: '2px' }}>{item}</li>
             ))}
             {hasATS && (
-              <li style={{ color: '#dc2626', fontWeight: 700 }}>Realizar canalización clínica para valoración de estrés post-traumático de forma prioritaria.</li>
+              <li style={{ color: '#dc2626', fontWeight: 700 }}>Realizar canalización clínica para valoración de forma prioritaria.</li>
             )}
           </ul>
         </div>
 
-        {/* 6 y 7. Seguimiento y Firma Directora */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '15px', marginBottom: '12px' }}>
+        {/* 6. Seguimiento */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '15px', marginBottom: '20px' }}>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '10px' }}>
             <div style={sectionTitleStyles}>6. Seguimiento</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '8px' }}>
@@ -248,19 +250,20 @@ export default function NOM035Report({ survey }: { survey: any }) {
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
             <div style={{ fontSize: '9px', fontWeight: 900, color: '#111827', textAlign: 'center' }}>DIRECCIÓN GENERAL</div>
             <div style={{ fontSize: '8px', color: '#6b7280', textAlign: 'center' }}>
-              {compKey === 'LOLA' ? 'LOLA BERRIES' : 'BOSBES BERRIES'} — 2026
+              {companyInfo.razonSocial}
             </div>
+            <div style={{ fontSize: '7px', color: '#9ca3af' }}>Reg. Patronal: {companyInfo.registroPatronal}</div>
           </div>
         </div>
 
         {/* Firmas */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '10px', marginTop: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginTop: 'auto', paddingBottom: '10mm' }}>
           {[
             { name: emp.fullName || emp.full_name,      lbl: 'Firma del Trabajador' },
             { name: 'RECURSOS HUMANOS', lbl: 'Sello y Firma — RRHH' },
           ].map(({ name, lbl }) => (
             <div key={lbl} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ width: '100%', height: '25px' }} />
+              <div style={{ width: '100%', height: '30px' }} />
               <div style={{ width: '100%', borderBottom: '1.5px solid #111827', marginBottom: '4px' }} />
               <div style={{ fontSize: '9px', fontWeight: 'bold', textAlign: 'center' }}>{name}</div>
               <div style={{ fontSize: '7.5px', color: '#9ca3af', textTransform: 'uppercase' }}>{lbl}</div>
@@ -269,28 +272,31 @@ export default function NOM035Report({ survey }: { survey: any }) {
         </div>
 
         {/* Pie legal */}
-        <footer style={{ textAlign: 'center', fontSize: '7.5px', color: '#9ca3af', fontStyle: 'italic', borderTop: '1px solid #e5e7eb', paddingTop: '6px' }}>
-          Documento generado conforme a la NOM-035-STPS-2018. Validez oficial para auditorías de la STPS.
+        <footer style={{ position: 'absolute', bottom: '10mm', left: '15mm', right: '15mm', textAlign: 'center', fontSize: '7.5px', color: '#9ca3af', fontStyle: 'italic', borderTop: '1px solid #e5e7eb', paddingTop: '6px' }}>
+          Documento generado bajo los lineamientos de la NOM-035-STPS-2018.
         </footer>
       </div>
 
       {/* Botón de Detalles (Solo Web) */}
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', margin: '10px 0' }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
         <button 
           onClick={() => setShowDetails(!showDetails)}
           style={{
-            padding: '8px 16px',
-            background: '#374151',
+            padding: '10px 20px',
+            background: '#111827',
             color: 'white',
             border: 'none',
-            borderRadius: '6px',
-            fontSize: '11px',
+            borderRadius: '8px',
+            fontSize: '12px',
             fontWeight: 'bold',
             cursor: 'pointer',
-            transition: 'background 0.2s'
+            transition: 'opacity 0.2s',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}
+          onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+          onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
         >
-          {showDetails ? '↑ Ocultar Respuestas Detalladas' : '↓ Ver Respuestas Detalladas (Anexo Técnico)'}
+          {showDetails ? '↑ Ocultar Respuestas Detalladas' : '↓ Ver Respuestas Detalladas (Anexo)'}
         </button>
       </div>
 
@@ -298,24 +304,25 @@ export default function NOM035Report({ survey }: { survey: any }) {
       {showDetails && (
         <div className="details-anexo" style={{
           width: '210mm', margin: '0 auto', background: '#fff',
-          padding: '11mm 14mm', boxSizing: 'border-box',
-          border: '1px solid #e5e7eb', borderRadius: '8px'
+          padding: '10mm 15mm', boxSizing: 'border-box',
+          border: '1px solid #e5e7eb', borderRadius: '8px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
         }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: '#111827', marginBottom: '10px', borderBottom: '2px solid #374151', paddingBottom: '4px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, color: '#111827', marginBottom: '15px', borderBottom: '2px solid #111827', paddingBottom: '4px' }}>
             ANEXO TÉCNICO: DESGLOSE DE RESPUESTAS INDIVIDUALES
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Guía I */}
             <div>
-              <div style={{ fontSize: '9px', fontWeight: 800, background: '#f3f4f6', padding: '4px 8px', marginBottom: '5px' }}>GUÍA I - ACONTECIMIENTO TRAUMÁTICO SEVERO</div>
+              <div style={{ fontSize: '9px', fontWeight: 800, background: '#f3f4f6', padding: '5px 10px', marginBottom: '8px', borderRadius: '4px' }}>GUÍA I - ACONTECIMIENTO TRAUMÁTICO SEVERO</div>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5px' }}>
                 <tbody>
                   {GUIDE_I.map(section => (
                     section.questions.map(q => (
                       <tr key={q.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '4px 0', color: '#4b5563', width: '80%' }}>{q.text.split('\n')[0]}</td>
-                        <td style={{ padding: '4px 0', fontWeight: 700, textAlign: 'right', color: survey.answers[q.id] === 'si' ? '#dc2626' : '#15803d' }}>
+                        <td style={{ padding: '5px 0', color: '#4b5563', width: '85%' }}>{q.text.split('\n')[0]}</td>
+                        <td style={{ padding: '5px 0', fontWeight: 700, textAlign: 'right', color: survey.answers[q.id] === 'si' ? '#dc2626' : '#15803d' }}>
                           {getAnswerLabel(q, survey.answers[q.id])}
                         </td>
                       </tr>
@@ -327,20 +334,20 @@ export default function NOM035Report({ survey }: { survey: any }) {
 
             {/* Guía III */}
             <div>
-              <div style={{ fontSize: '9px', fontWeight: 800, background: '#f3f4f6', padding: '4px 8px', marginBottom: '5px' }}>GUÍA III - ENTORNO ORGANIZACIONAL FAVORABLE</div>
+              <div style={{ fontSize: '9px', fontWeight: 800, background: '#f3f4f6', padding: '5px 10px', marginBottom: '8px', borderRadius: '4px' }}>GUÍA III - ENTORNO ORGANIZACIONAL FAVORABLE</div>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8px' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-                    <th style={{ textAlign: 'left', padding: '4px 0' }}>Pregunta</th>
-                    <th style={{ textAlign: 'right', padding: '4px 0' }}>Respuesta</th>
+                    <th style={{ textAlign: 'left', padding: '6px 0' }}>Pregunta</th>
+                    <th style={{ textAlign: 'right', padding: '6px 0' }}>Respuesta</th>
                   </tr>
                 </thead>
                 <tbody>
                   {GUIDE_III.map(section => (
                     section.questions.map(q => (
                       <tr key={q.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                        <td style={{ padding: '4px 0', color: '#4b5563' }}>{q.text}</td>
-                        <td style={{ padding: '4px 0', fontWeight: 700, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <td style={{ padding: '5px 0', color: '#4b5563' }}>{q.text}</td>
+                        <td style={{ padding: '5px 0', fontWeight: 700, textAlign: 'right', whiteSpace: 'nowrap' }}>
                           {getAnswerLabel(q, survey.answers[q.id])}
                         </td>
                       </tr>

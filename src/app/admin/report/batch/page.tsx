@@ -62,9 +62,10 @@ export default async function BatchReportPage({ searchParams }: { searchParams: 
             break-after: page !important;
             break-inside: avoid !important;
           }
-          .acuse-sheet:last-child {
-            page-break-after: auto !important;
-            break-after: auto !important;
+          /* Evitar el salto de página en el último elemento para no crear hoja en blanco */
+          .batch-container > .acuse-root:last-child .acuse-sheet {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
           @page {
             margin: 0;
