@@ -13,19 +13,21 @@ const QUESTIONS_MAP = new Map<string, Question>(
 );
 
 // Umbrales oficiales NOM-035 Guía III (> 50 trabajadores)
+// Formato: [límite_bajo, límite_medio, límite_alto, límite_muy_alto]
+// getRiskLevel: score < t[0]=Nulo, < t[1]=Bajo, < t[2]=Medio, < t[3]=Alto, else=MuyAlto
 const G3_THRESHOLDS: Thresholds = {
   total: [50, 75, 99, 140],
   domains: {
-    'Condiciones en el ambiente de trabajo': [5, 9, 11, 14],
-    'Carga de trabajo': [15, 21, 27, 37],
-    'Falta de control sobre el trabajo': [11, 16, 21, 25],
-    'Jornada de trabajo': [1, 2, 4, 6],
-    'Interferencia en la relación trabajo-familia': [1, 2, 4, 6],
-    'Liderazgo': [9, 12, 16, 23],
-    'Relaciones en el trabajo': [10, 13, 17, 24],
-    'Violencia laboral': [7, 10, 13, 16],
-    'Reconocimiento del desempeño': [6, 10, 13, 18],
-    'Insuficiente sentido de pertenencia e inestabilidad': [4, 7, 11, 15]
+    'Condiciones en el ambiente de trabajo':          [5,  10, 15, 21],  // Nulo 0-4, Bajo 5-9, Medio 10-14, Alto 15-20
+    'Carga de trabajo':                               [15, 30, 45, 57],  // Nulo 0-14, Bajo 15-29, Medio 30-44, Alto 45-56
+    'Falta de control sobre el trabajo':              [11, 21, 31, 41],  // Nulo 0-10, Bajo 11-20, Medio 21-30, Alto 31-40
+    'Jornada de trabajo':                             [2,  4,  6,  9],   // Nulo 0-1, Bajo 2-3, Medio 4-5, Alto 6-8
+    'Interferencia en la relación trabajo-familia':   [4,  7,  10, 13],  // Nulo 0-3, Bajo 4-6, Medio 7-9, Alto 10-12
+    'Liderazgo':                                      [9,  12, 15, 21],  // Nulo 0-8, Bajo 9-11, Medio 12-14, Alto 15-20
+    'Relaciones en el trabajo':                       [15, 29, 43, 57],  // Nulo 0-14, Bajo 15-28, Medio 29-42, Alto 43-56
+    'Violencia laboral':                              [8,  16, 24, 33],  // Nulo 0-7, Bajo 8-15, Medio 16-23, Alto 24-32
+    'Reconocimiento del desempeño':                   [6,  10, 14, 21],  // Nulo 0-5, Bajo 6-9, Medio 10-13, Alto 14-20
+    'Insuficiente sentido de pertenencia e inestabilidad': [4, 7, 10, 13], // Nulo 0-3, Bajo 4-6, Medio 7-9, Alto 10-12
   }
 };
 
@@ -132,7 +134,9 @@ export function calculateOrganizationalRisk(normativeResults: any, positionRaw: 
   
   const isManagerial = [
     'GERENTE', 'DIRECTOR', 'JEFE', 'JEFATURA', 'SUPERVISOR', 
-    'COORDINADOR', 'LIDER', 'MANAGER', 'DIRECTORA', 'ENCARGADO'
+    'COORDINADOR', 'LIDER', 'MANAGER', 'DIRECTORA', 'ENCARGADO',
+    'RH', 'RECURSOS HUMANOS', 'NOMINA', 'ADMINISTRATIVO', 'COMPRAS',
+    'INOCUIDAD', 'SUPERVISION', 'MONITOREO'
   ].some(kw => position.includes(kw));
 
   if (!isManagerial) {
