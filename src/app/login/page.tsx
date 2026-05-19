@@ -37,15 +37,32 @@ export default function LoginPage() {
       const employees = await response.json();
       
       const inputNormalized = normalizeText(employeeCode);
+      const searchWords = inputNormalized.split(' ').filter(w => w.length > 2); // Ignore small words like 'de', 'la'
 
-      const found = employees.find((emp: any) => 
-        normalizeText(emp.fullName) === inputNormalized && emp.company === selectedCompany
-      );
+      const matchedEmployees = employees.filter((emp: any) => {
+        if (emp.company !== selectedCompany) return false;
+        
+        const dbName = normalizeText(emp.fullName);
+        const dbCode = normalizeText(emp.code);
+
+        // 1. Exact Match (Name or Code)
+        if (dbName === inputNormalized || dbCode === inputNormalized) return true;
+
+        // 2. Fuzzy Match (If user types "Jesus Hernandez Nuñez", it matches "j. de jesus hernandez nunez")
+        // Require at least 2 significant words to prevent broad matches
+        if (searchWords.length >= 2 && searchWords.every(word => dbName.includes(word))) {
+            return true;
+        }
+
+        return false;
+      });
       
-      if (found) {
-        setEmployeeData(found);
+      if (matchedEmployees.length === 1) {
+        setEmployeeData(matchedEmployees[0]);
+      } else if (matchedEmployees.length > 1) {
+        setError('Hay varias personas con un nombre similar. Por favor ingresa tus dos apellidos completos o tu código de empleado.');
       } else {
-        setError('No se encontró a ningún trabajador con ese nombre en esta empresa');
+        setError('No se encontró a ningún trabajador con ese nombre en esta empresa. Intenta usando tu código de empleado.');
       }
     } catch (err) {
       setError('Error al conectar con el servidor de nómina');
@@ -133,7 +150,7 @@ export default function LoginPage() {
                       type="text"
                       value={employeeCode}
                       onChange={(e) => setEmployeeCode(e.target.value)}
-                      placeholder="Nombre tal cual aparece en tu nómina"
+                      placeholder="Nombre completo o Código de empleado"
                       className="block w-full pl-11 pr-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 outline-none text-white transition-all"
                       autoFocus
                     />

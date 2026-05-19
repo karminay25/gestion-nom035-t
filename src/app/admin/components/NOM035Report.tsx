@@ -75,10 +75,13 @@ export default function NOM035Report({ survey }: { survey: any }) {
     );
   }
 
-  const rawCompany = emp.company || '';
-  const isLola = rawCompany.toUpperCase().includes('LOLA');
-  const compKey = isLola ? 'LOLA' : 'BOSBES';
-  const companyInfo = COMPANY_DATA[compKey] || COMPANY_DATA['LOLA'];
+  const rawCompany = (emp.company || '').toUpperCase();
+  const isLola = rawCompany.includes('LOLA');
+  const isBosbes = rawCompany.includes('BOSBES');
+  
+  // Si no es ninguna, intentamos por departamento o default a LOLA
+  const compKey = isLola ? 'LOLA' : (isBosbes ? 'BOSBES' : 'LOLA');
+  const companyInfo = COMPANY_DATA[compKey];
 
   const fechaEncuesta = new Date(survey.completed_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
   const entryDate = emp.entryDate || emp.entry_date;
@@ -112,7 +115,7 @@ export default function NOM035Report({ survey }: { survey: any }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #000', paddingBottom: '7px', marginBottom: '9px' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <div style={{ width: '40px', height: '40px', position: 'relative', flexShrink: 0 }}>
-                <Image src={companyInfo.logo} alt="Logo" fill style={{ objectFit: 'contain' }} />
+                <img src={companyInfo.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div>
                 <h1 style={{ margin: 0, fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.1 }}>Acuse de Evaluación Individual NOM-035-STPS-2018</h1>

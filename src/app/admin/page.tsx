@@ -302,14 +302,16 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
           <div className="p-6 border-b border-white/10 bg-white/[0.02]">
             <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+              <div className="relative flex-1 group">
+                <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors" />
                 <input 
                   type="text"
-                  placeholder="Buscar colaborador o código..." 
+                  placeholder="Buscar por nombre, código o empresa..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500/30 outline-none transition-all placeholder-gray-600"
+                  autoComplete="off"
+                  spellCheck="false"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl pl-11 pr-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 outline-none transition-all placeholder-gray-600 text-white"
                 />
               </div>
               <div className="flex gap-3">
@@ -384,7 +386,10 @@ export default function AdminDashboard() {
                           </div>
                           <div>
                             <div className="font-black text-sm text-gray-100">{emp.fullName}</div>
-                            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1">{emp.code}</div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">{emp.code}</span>
+                              <span className="text-[9px] text-blue-500/60 font-black px-1.5 py-0.5 bg-blue-500/5 rounded border border-blue-500/10 uppercase tracking-tighter">{emp.company}</span>
+                            </div>
                           </div>
                         </div>
                       </td>
