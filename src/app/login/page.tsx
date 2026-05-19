@@ -48,9 +48,17 @@ export default function LoginPage() {
         // 1. Exact Match (Name or Code)
         if (dbName === inputNormalized || dbCode === inputNormalized) return true;
 
-        // 2. Fuzzy Match (If user types "Jesus Hernandez Nuñez", it matches "j. de jesus hernandez nunez")
-        // Require at least 2 significant words to prevent broad matches
-        if (searchWords.length >= 2 && searchWords.every(word => dbName.includes(word))) {
+        // 2. Fuzzy Word Overlap Match (Tolerates typos like "kala" instead of "karla")
+        const dbWords = dbName.split(' ');
+        
+        // Count how many words from the user's input exist in the database name
+        const matchingWords = searchWords.filter(searchWord => 
+          dbWords.some(dbWord => dbWord === searchWord || dbWord.includes(searchWord) || searchWord.includes(dbWord))
+        );
+
+        // If they wrote at least 2 correct words that match the DB name, let them in.
+        // For example: "kala guadalupe contreras flores" -> "guadalupe", "contreras", "flores" match (3 > 2).
+        if (searchWords.length >= 2 && matchingWords.length >= 2 && (matchingWords.length / searchWords.length >= 0.5)) {
             return true;
         }
 
