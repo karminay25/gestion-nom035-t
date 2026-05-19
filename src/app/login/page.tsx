@@ -39,26 +39,36 @@ export default function LoginPage() {
       const inputNormalized = normalizeText(employeeCode);
       const searchWords = inputNormalized.split(' ').filter(w => w.length > 2); // Ignore small words like 'de', 'la'
 
+      // 1. Exact Match (Prioridad Absoluta)
+      const exactMatch = employees.find((emp: any) => {
+        if (emp.company !== selectedCompany) return false;
+        const dbName = normalizeText(emp.fullName);
+        const dbCode = normalizeText(emp.code);
+        return dbName === inputNormalized || dbCode === inputNormalized;
+      });
+
+      if (exactMatch) {
+        setEmployeeData(exactMatch);
+        return;
+      }
+
+      // 2. Fuzzy Match (Si falla el exacto, toleramos 1 error ortográfico)
       const matchedEmployees = employees.filter((emp: any) => {
         if (emp.company !== selectedCompany) return false;
         
         const dbName = normalizeText(emp.fullName);
-        const dbCode = normalizeText(emp.code);
-
-        // 1. Exact Match (Name or Code)
-        if (dbName === inputNormalized || dbCode === inputNormalized) return true;
-
-        // 2. Fuzzy Word Overlap Match (Tolerates typos like "kala" instead of "karla")
-        const dbWords = dbName.split(' ');
+        const dbWords = dbName.split(' ').filter(w => w.length > 2);
         
-        // Count how many words from the user's input exist in the database name
+        // Contar cuantas palabras del input existen en el nombre de la BD
         const matchingWords = searchWords.filter(searchWord => 
           dbWords.some(dbWord => dbWord === searchWord || dbWord.includes(searchWord) || searchWord.includes(dbWord))
         );
 
-        // If they wrote at least 2 correct words that match the DB name, let them in.
-        // For example: "kala guadalupe contreras flores" -> "guadalupe", "contreras", "flores" match (3 > 2).
-        if (searchWords.length >= 2 && matchingWords.length >= 2 && (matchingWords.length / searchWords.length >= 0.5)) {
+        // Requerimos que casi todas las palabras coincidan (permitimos max 1 error o palabra omitida)
+        // Ejemplo: Si input tiene 4 palabras, deben coincidir al menos 3. Si BD tiene 4 palabras, deben coincidir al menos 3.
+        if (searchWords.length >= 2 && 
+            matchingWords.length >= searchWords.length - 1 && 
+            matchingWords.length >= dbWords.length - 1) {
             return true;
         }
 
